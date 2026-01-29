@@ -86,23 +86,26 @@ function renderDrawer(){
 
 /* ===== RENDER PRINCIPAL ===== */
 function render(){
+  
   sortItems();
   editBtn.textContent = editMode ? "↩️ Volver" : "✏️ Editar";
   renderDrawer();
 
-  const q = search.value.toLowerCase();
-  list.innerHTML = items
-    .filter(i => q ? i.name.toLowerCase().includes(q) : i.cat === activeCat)
-    .map(i => `
+  const q = search.value.toLowerCase(); // <- esto faltaba
+list.innerHTML = items
+  .filter(i => q ? i.name.toLowerCase().includes(q) : i.cat === activeCat)
+    .map((i, index) => `
       <div class="item">
         <span>
           ${i.name}
           ${q ? `<small style="color:#666">(${i.cat})</small>` : ""}
         </span>
         <div>
-          ${editMode
-            ? `<button class="del" onclick="askDeleteItem('${i.name}')">✕</button>`
-            : `<button class="add" onclick="showQtyModal('${i.name}')">+</button>`}
+         ${editMode
+  ? `<button class="del" onclick="askDeleteItem('${i.name.replace(/'/g,"\\'")}')">✕</button>
+     <button class="edit" onclick="editItem(${index})">✏️</button>`
+  : `<button class="add" onclick="showQtyModal('${i.name.replace(/'/g,"\\'")}')">+</button>`}
+
         </div>
       </div>
     `).join("");
@@ -111,6 +114,40 @@ function render(){
   localStorage.items = JSON.stringify(items);
   localStorage.cart  = JSON.stringify(cart);
 }
+
+function editItem(index){
+  const item = items[index];
+  const m = document.createElement("div");
+  m.className = "modal";
+  m.style.display = "flex";
+  m.innerHTML = `
+    <div class="box">
+      <h3>Editar artículo</h3>
+      <input id="iname" value="${item.name}" placeholder="Nombre">
+      <select id="icat">
+        ${categories.map(c => `<option ${c===item.cat ? 'selected' : ''}>${c}</option>`).join("")}
+      </select>
+      <div>
+        <button id="save">Guardar</button>
+        <button id="cancel">Cancelar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(m);
+
+  m.querySelector("#cancel").onclick = () => m.remove();
+  m.querySelector("#save").onclick = () => {
+    const n = m.querySelector("#iname").value.trim();
+    const c = m.querySelector("#icat").value;
+    if(n){
+      items[index].name = n;
+      items[index].cat = c;
+      m.remove();
+      render();
+    }
+  };
+}
+
 
 /* ===== NUEVO ARTÍCULO ===== */
 function showAddItem(){
@@ -289,15 +326,6 @@ function previewWhatsApp(){
 }
 function sendWhatsApp(){ previewWhatsApp(); }
 
-/* ===== DATOS INICIALES ===== */
-if(items.length===0){
-  items=[
-    { name:"Agua 50cl", cat:"Aguas y refrescos" },
-    { name:"Agua 1,25 litros", cat:"Aguas y refrescos" },
-    { name:"Coca Cola", cat:"Aguas y refrescos" }
-  ];
-}
-
 /* ===== EXPORTAR / IMPORTAR ===== */
 function exportData(){
   const data={items, cart};
@@ -318,6 +346,19 @@ function importData(event){
   };
   reader.readAsText(file);
 }
+
+let items = JSON.parse(localStorage.items || "[]");
+
+// Si no hay items en localStorage, inicializa con algunos
+if(items.length === 0){
+  items=[
+    { name:"Agua 50cl", cat:"Aguas y refrescos" },
+    { name:"Agua 1,25 litros", cat:"Aguas y refrescos" },
+    { name:"Coca Cola", cat:"Aguas y refrescos" }
+  ];
+}
+
+search.addEventListener('input', render);
 
 /* ===== INICIALIZAR ===== */
 render();
