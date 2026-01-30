@@ -347,10 +347,6 @@ function importData(event){
   reader.readAsText(file);
 }
 
-/* ===== DATOS INICIALES ===== */
-let items = JSON.parse(localStorage.items || "[]");
-let cart  = JSON.parse(localStorage.cart  || "[]");
-
 // Si no hay items en localStorage, inicializa con algunos
 if(items.length === 0){
   items = [
