@@ -251,11 +251,30 @@ function printTicket(){
 /* ===== INICIAL ===== */
 if(items.length === 0){
   items = [
-    { name:"Agua 50cl", cat:"Aguas y refrescos" },
-    { name:"Agua 1,25 litros", cat:"Aguas y refrescos" },
-    { name:"Coca Cola", cat:"Aguas y refrescos" }
+    {
+      name: "Agua 50cl",
+      cat: "Aguas y refrescos",
+      price: 0,
+      provider: "",
+      notes: ""
+    },
+    {
+      name: "Agua 1,25 litros",
+      cat: "Aguas y refrescos",
+      price: 0,
+      provider: "",
+      notes: ""
+    },
+    {
+      name: "Coca Cola",
+      cat: "Aguas y refrescos",
+      price: 0,
+      provider: "Coca Cola",
+      notes: ""
+    }
   ];
 }
+
 
 search.addEventListener("input", render);
 render();
