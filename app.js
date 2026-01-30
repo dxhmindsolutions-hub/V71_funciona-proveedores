@@ -39,48 +39,34 @@ const categories = [
 let activeCat = categories[0];
 let items = JSON.parse(localStorage.items || "[]");
 let cart  = JSON.parse(localStorage.cart  || "[]");
-
 let deleteIndex = null;
 let deleteType  = null;
 
 /* ===== ORDEN INTELIGENTE ===== */
-function parseQty(name){
-  const m = name.match(/([\d,.]+)/);
-  return m ? parseFloat(m[1].replace(',', '.')) : null;
-}
-function baseName(name){
-  return name.replace(/[\d.,]+\s*(cl|l|litros?|kg|g)?/i, '').trim();
-}
+function parseQty(name){ const m = name.match(/([\d,.]+)/); return m ? parseFloat(m[1].replace(',', '.')) : null; }
+function baseName(name){ return name.replace(/[\d.,]+\s*(cl|l|litros?|kg|g)?/i, '').trim(); }
 function sortItems(){
   items.sort((a, b) => {
     if(a.cat !== b.cat) return a.cat.localeCompare(b.cat, 'es');
-    const baseA = baseName(a.name);
-    const baseB = baseName(b.name);
+    const baseA = baseName(a.name), baseB = baseName(b.name);
     if(baseA !== baseB) return baseA.localeCompare(baseB, 'es');
-    const qA = parseQty(a.name);
-    const qB = parseQty(b.name);
-    if(qA !== null && qB !== null) return qA - qB;
-    if(qA !== null) return -1;
-    if(qB !== null) return 1;
+    const qA = parseQty(a.name), qB = parseQty(b.name);
+    if(qA!==null && qB!==null) return qA-qB;
+    if(qA!==null) return -1;
+    if(qB!==null) return 1;
     return a.name.localeCompare(b.name, 'es');
   });
 }
 
 /* ===== DRAWER ===== */
-function toggleDrawer(){
-  drawer.classList.toggle("open");
-}
+function toggleDrawer(){ drawer.classList.toggle("open"); }
 function renderDrawer(){
   drawer.innerHTML = "";
   categories.forEach(cat => {
     const btn = document.createElement("button");
     btn.textContent = cat;
     if(cat === activeCat) btn.classList.add("active");
-    btn.onclick = () => {
-      activeCat = cat;
-      toggleDrawer();
-      render();
-    };
+    btn.onclick = () => { activeCat = cat; toggleDrawer(); render(); };
     drawer.appendChild(btn);
   });
 }
@@ -89,30 +75,23 @@ function renderDrawer(){
 function render(){
   sortItems();
   renderDrawer();
-
   const q = search.value.toLowerCase();
-
   list.innerHTML = items
     .filter(i => q ? i.name.toLowerCase().includes(q) : i.cat === activeCat)
     .map(i => {
       const realIndex = items.indexOf(i);
       return `
         <div class="item">
-          <span>
-            ${i.name}
-            ${q ? `<small style="color:#666">(${i.cat})</small>` : ""}
-          </span>
+          <span>${i.name}${q?`<small style="color:#666">(${i.cat})</small>`:""}</span>
           <div>
             ${editMode
               ? `<button class="del" onclick="askDeleteItem('${i.name.replace(/'/g,"\\'")}')">✕</button>
                  <button class="edit" onclick="editItem(${realIndex})">✏️</button>`
-              : `<button class="add" onclick="showQtyModal('${i.name.replace(/'/g,"\\'")}')">+</button>`
-            }
+              : `<button class="add" onclick="showQtyModal('${i.name.replace(/'/g,"\\'")}')">+</button>`}
           </div>
         </div>
       `;
     }).join("");
-
   renderTicket();
   localStorage.items = JSON.stringify(items);
   localStorage.cart  = JSON.stringify(cart);
@@ -122,8 +101,7 @@ function render(){
 function editItem(index){
   const item = items[index];
   const m = document.createElement("div");
-  m.className = "modal";
-  m.style.display = "flex";
+  m.className="modal"; m.style.display="flex";
   m.innerHTML = `
     <div class="box">
       <h3>Editar artículo</h3>
@@ -135,88 +113,65 @@ function editItem(index){
         <button id="save">Guardar</button>
         <button id="cancel">Cancelar</button>
       </div>
-    </div>
-  `;
+    </div>`;
   document.body.appendChild(m);
-
-  m.querySelector("#cancel").onclick = () => m.remove();
-  m.querySelector("#save").onclick = () => {
+  m.querySelector("#cancel").onclick = ()=>m.remove();
+  m.querySelector("#save").onclick = ()=>{
     item.name = m.querySelector("#iname").value.trim();
     item.cat  = m.querySelector("#icat").value;
-    m.remove();
-    render();
+    m.remove(); render();
   };
 }
 
 /* ===== NUEVO ARTÍCULO ===== */
 function showAddItem(){
   const m = document.createElement("div");
-  m.className = "modal";
-  m.style.display = "flex";
+  m.className="modal"; m.style.display="flex";
   m.innerHTML = `
     <div class="box">
       <h3>Nuevo artículo</h3>
       <input id="iname">
-      <select id="icat">
-        ${categories.map(c=>`<option>${c}</option>`).join("")}
-      </select>
+      <select id="icat">${categories.map(c=>`<option>${c}</option>`).join("")}</select>
       <div>
         <button id="save">Guardar</button>
         <button id="cancel">Cancelar</button>
       </div>
-    </div>
-  `;
+    </div>`;
   document.body.appendChild(m);
-
-  m.querySelector("#cancel").onclick = () => m.remove();
-  m.querySelector("#save").onclick = () => {
+  m.querySelector("#cancel").onclick = ()=>m.remove();
+  m.querySelector("#save").onclick = ()=>{
     items.push({
       name: m.querySelector("#iname").value.trim(),
       cat:  m.querySelector("#icat").value
     });
-    m.remove();
-    render();
+    m.remove(); render();
   };
 }
 
 /* ===== CANTIDAD ===== */
 function showQtyModal(name){
-  let qty = 1;
-  let unit = "UNIDAD";
-
-  const m = document.createElement("div");
-  m.className = "modal";
-  m.style.display = "flex";
-  m.innerHTML = `
+  let qty=1, unit="UNIDAD";
+  const m=document.createElement("div"); m.className="modal"; m.style.display="flex";
+  m.innerHTML=`
     <div class="box">
       <h3>${name}</h3>
       <div class="btns qty">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<button>${n}</button>`).join("")}</div>
       <div class="btns unit">
-        <button class="active">UNIDAD</button>
-        <button>KG</button>
-        <button>CAJA</button>
+        <button class="active">UNIDAD</button><button>KG</button><button>CAJA</button>
       </div>
       <div>
         <button id="add">Añadir</button>
         <button id="cancel">Cancelar</button>
       </div>
-    </div>
-  `;
+    </div>`;
   document.body.appendChild(m);
-
-  m.querySelectorAll(".qty button").forEach(b=>{
-    b.onclick = ()=>{ qty = +b.textContent; };
-  });
-  m.querySelectorAll(".unit button").forEach(b=>{
-    b.onclick = ()=>{ unit = b.textContent; };
-  });
-
-  m.querySelector("#cancel").onclick = ()=> m.remove();
+  m.querySelectorAll(".qty button").forEach(b=>b.onclick=()=>{ qty=+b.textContent; });
+  m.querySelectorAll(".unit button").forEach(b=>b.onclick=()=>{ unit=b.textContent; });
+  m.querySelector("#cancel").onclick = ()=>m.remove();
   m.querySelector("#add").onclick = ()=>{
     const found = cart.find(c=>c.name===name && c.unit===unit);
-    found ? found.qty+=qty : cart.push({ name, qty, unit });
-    m.remove();
-    render();
+    found?found.qty+=qty:cart.push({name,qty,unit});
+    m.remove(); render();
   };
 }
 
@@ -229,52 +184,44 @@ function renderTicket(){
       <button class="del" onclick="askDeleteTicket(${i})">✕</button>
     </li>
   `).join("");
-
   viewTicketBtn.textContent = `🧾 Ver Ticket [ ${String(cart.length).padStart(2,"0")} ]`;
-  viewTicketBtn.style.display = cart.length ? "block" : "none";
+  viewTicketBtn.style.display = cart.length?"block":"none";
 }
+function openTicketModal(){ renderTicket(); ticketModal.style.display="flex"; }
+function closeTicketModal(){ ticketModal.style.display="none"; }
+
+/* ===== ELIMINAR ===== */
+function askDeleteItem(name){ deleteType="item"; deleteIndex=items.findIndex(i=>i.name===name); confirmText.textContent=`¿Eliminar ${name}?`; confirmModal.style.display="flex"; }
+function askDeleteTicket(i){ deleteType="ticket"; deleteIndex=i; confirmText.textContent=`¿Eliminar ${cart[i].name}?`; confirmModal.style.display="flex"; }
+function askResetTicket(){ deleteType="reset"; confirmText.textContent="¿Eliminar ticket de pedido?"; confirmModal.style.display="flex"; }
+function confirmDelete(){ if(deleteType==="item") items.splice(deleteIndex,1); if(deleteType==="ticket") cart.splice(deleteIndex,1); if(deleteType==="reset") cart=[]; closeConfirm(); render(); }
+function closeConfirm(){ confirmModal.style.display="none"; }
 
 /* ===== WHATSAPP ===== */
 function sendWhatsApp(){
-  let txt = "🧾 *PEDIDO*\n\n";
-  cart.forEach(c=>{
-    txt += `- ${c.name}: ${c.qty} ${c.unit}\n`;
-  });
+  let txt="🧾 *PEDIDO*\n\n";
+  cart.forEach(c=>{ txt+=`- ${c.name}: ${c.qty} ${c.unit}\n`; });
   window.open("https://wa.me/?text="+encodeURIComponent(txt));
 }
 
 /* ===== IMPRIMIR ===== */
 function printTicket(){
-  window.print();
+  const container=document.getElementById("print-ticket");
+  const fecha=document.getElementById("ticket-fecha");
+  const itemsContainer=document.getElementById("ticket-items");
+  fecha.textContent=new Date().toLocaleString();
+  itemsContainer.innerHTML="";
+  cart.forEach(c=>{
+    const div=document.createElement("div");
+    div.innerHTML=`<span>${c.name}</span><span>${c.qty} ${c.unit}</span>`;
+    itemsContainer.appendChild(div);
+  });
+  container.style.display="block"; window.print(); container.style.display="none";
 }
 
 /* ===== INICIAL ===== */
-if(items.length === 0){
-  items = [
-    {
-      name: "Agua 50cl",
-      cat: "Aguas y refrescos",
-      price: 0,
-      provider: "",
-      notes: ""
-    },
-    {
-      name: "Agua 1,25 litros",
-      cat: "Aguas y refrescos",
-      price: 0,
-      provider: "",
-      notes: ""
-    },
-    {
-      name: "Coca Cola",
-      cat: "Aguas y refrescos",
-      price: 0,
-      provider: "Coca Cola",
-      notes: ""
-    }
-  ];
+if(items.length===0){
+  items=[{name:"Agua 50cl",cat:"Aguas y refrescos"},{name:"Agua 1,25 litros",cat:"Aguas y refrescos"},{name:"Coca Cola",cat:"Aguas y refrescos"}];
 }
-
-
 search.addEventListener("input", render);
 render();
