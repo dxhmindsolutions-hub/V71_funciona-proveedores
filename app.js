@@ -122,7 +122,6 @@ function editItem(index){
     m.remove(); render();
   };
 }
-
 /* ===== NUEVO ARTÍCULO ===== */
 function showAddItem(){
   const m = document.createElement("div");
@@ -150,28 +149,57 @@ function showAddItem(){
 
 /* ===== CANTIDAD ===== */
 function showQtyModal(name){
-  let qty=1, unit="UNIDAD";
-  const m=document.createElement("div"); m.className="modal"; m.style.display="flex";
-  m.innerHTML=`
+  let qty = 1, unit = "UNIDAD";
+  const m = document.createElement("div");
+  m.className = "modal";
+  m.style.display = "flex";
+  m.innerHTML = `
     <div class="box">
       <h3>${name}</h3>
-      <div class="btns qty">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<button>${n}</button>`).join("")}</div>
+      <div class="btns qty">
+        ${[1,2,3,4,5,6,7,8,9,10].map(n=>`<button>${n}</button>`).join("")}
+      </div>
       <div class="btns unit">
-        <button class="active">UNIDAD</button><button>KG</button><button>CAJA</button>
+        <button class="active">UNIDAD</button>
+        <button>KG</button>
+        <button>CAJA</button>
       </div>
       <div>
         <button id="add">Añadir</button>
         <button id="cancel">Cancelar</button>
       </div>
-    </div>`;
+    </div>
+  `;
   document.body.appendChild(m);
-  m.querySelectorAll(".qty button").forEach(b=>b.onclick=()=>{ qty=+b.textContent; });
-  m.querySelectorAll(".unit button").forEach(b=>b.onclick=()=>{ unit=b.textContent; });
-  m.querySelector("#cancel").onclick = ()=>m.remove();
-  m.querySelector("#add").onclick = ()=>{
+
+  // ✅ marcar cantidad 1 por defecto
+  const firstQtyBtn = m.querySelector(".qty button");
+  if(firstQtyBtn){
+    firstQtyBtn.classList.add("active");
+  }
+
+  m.querySelectorAll(".qty button").forEach(b=>{
+    b.onclick = () => {
+      m.querySelectorAll(".qty button").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      qty = +b.textContent;
+    };
+  });
+
+  m.querySelectorAll(".unit button").forEach(b=>{
+    b.onclick = () => {
+      m.querySelectorAll(".unit button").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      unit = b.textContent;
+    };
+  });
+
+  m.querySelector("#cancel").onclick = () => m.remove();
+  m.querySelector("#add").onclick = () => {
     const found = cart.find(c=>c.name===name && c.unit===unit);
-    found?found.qty+=qty:cart.push({name,qty,unit});
-    m.remove(); render();
+    found ? found.qty += qty : cart.push({ name, qty, unit });
+    m.remove();
+    render();
   };
 }
 
