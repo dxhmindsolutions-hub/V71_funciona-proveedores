@@ -252,4 +252,48 @@ if(items.length===0){
   items=[{name:"Agua 50cl",cat:"Aguas y refrescos"},{name:"Agua 1,25 litros",cat:"Aguas y refrescos"},{name:"Coca Cola",cat:"Aguas y refrescos"}];
 }
 search.addEventListener("input", render);
+
+/* ===== EXPORTAR / IMPORTAR ===== */
+function exportData(){
+  const data = {
+    items,
+    cart
+  };
+  const blob = new Blob(
+    [JSON.stringify(data, null, 2)],
+    { type: "application/json" }
+  );
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "backup_despensa.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(event){
+  const file = event.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const data = JSON.parse(e.target.result);
+      if(data.items && data.cart){
+        items = data.items;
+        cart  = data.cart;
+        localStorage.items = JSON.stringify(items);
+        localStorage.cart  = JSON.stringify(cart);
+        render();
+        alert("Copia restaurada correctamente ✅");
+      } else {
+        alert("Archivo inválido ⚠️");
+      }
+    } catch {
+      alert("Error al leer el archivo ⚠️");
+    }
+  };
+  reader.readAsText(file);
+}
+
 render();
