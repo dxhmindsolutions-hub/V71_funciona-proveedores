@@ -347,17 +347,20 @@ function importData(event){
   reader.readAsText(file);
 }
 
+/* ===== DATOS INICIALES ===== */
 let items = JSON.parse(localStorage.items || "[]");
+let cart  = JSON.parse(localStorage.cart  || "[]");
 
 // Si no hay items en localStorage, inicializa con algunos
 if(items.length === 0){
-  items=[
-    { name:"Agua 50cl", cat:"Aguas y refrescos" },
-    { name:"Agua 1,25 litros", cat:"Aguas y refrescos" },
-    { name:"Coca Cola", cat:"Aguas y refrescos" }
+  items = [
+    { name: "Agua 50cl", cat: "Aguas y refrescos" },
+    { name: "Agua 1,25 litros", cat: "Aguas y refrescos" },
+    { name: "Coca Cola", cat: "Aguas y refrescos" }
   ];
 }
 
+// Escucha cambios en el buscador y actualiza la lista
 search.addEventListener('input', render);
 
 /* ===== INICIALIZAR ===== */
