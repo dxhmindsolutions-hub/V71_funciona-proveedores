@@ -226,11 +226,54 @@ function confirmDelete(){ if(deleteType==="item") items.splice(deleteIndex,1); i
 function closeConfirm(){ confirmModal.style.display="none"; }
 
 /* ===== WHATSAPP ===== */
-function sendWhatsApp(){
-  let txt="🧾 *PEDIDO*\n\n";
-  cart.forEach(c=>{ txt+=`- ${c.name}: ${c.qty} ${c.unit}\n`; });
-  window.open("https://wa.me/?text="+encodeURIComponent(txt));
+function buildWhatsAppText(){
+  let txt = "🧾 *PEDIDO*\n\n";
+  categories.forEach(cat=>{
+    const lines = cart.filter(c =>
+      items.find(i => i.name === c.name && i.cat === cat)
+    );
+    if(lines.length){
+      txt += `*${cat}*\n`;
+      lines.forEach(l=>{
+        txt += `- ${l.name}: ${l.qty} ${l.unit}\n`;
+      });
+      txt += "\n";
+    }
+  });
+  return txt.trim();
 }
+
+function previewWhatsApp(){
+  const m = document.createElement("div");
+  m.className = "modal";
+  m.style.display = "flex";
+  m.innerHTML = `
+    <div class="box">
+      <h3>Vista previa WhatsApp</h3>
+      <textarea style="width:100%;height:220px">${buildWhatsAppText()}</textarea>
+      <div>
+        <button id="cancel">Cancelar</button>
+        <button id="send">Enviar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(m);
+
+  m.querySelector("#cancel").onclick = () => m.remove();
+  m.querySelector("#send").onclick = () => {
+    const txt = m.querySelector("textarea").value;
+    window.open(
+      "https://wa.me/?text=" + encodeURIComponent(txt),
+      "_blank"
+    );
+    m.remove();
+  };
+}
+
+function sendWhatsApp(){
+  previewWhatsApp();
+}
+
 
 /* ===== IMPRIMIR ===== */
 function printTicket(){
