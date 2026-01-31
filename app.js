@@ -421,8 +421,20 @@ function printTicket(){
 
 /* ===== INICIAL ===== */
 if(items.length===0){
-  items=[{name:"Agua 50cl",cat:"Aguas y refrescos"},{name:"Agua 1,25 litros",cat:"Aguas y refrescos"},{name:"Coca Cola",cat:"Aguas y refrescos"}];
+  items = [
+    {name:"Agua 50cl",cat:"Aguas y refrescos"},
+    {name:"Agua 1,25 litros",cat:"Aguas y refrescos"},
+    {name:"Coca Cola",cat:"Aguas y refrescos"}
+  ];
 }
+
+// Guardar en localStorage si era vacío
+localStorage.items = JSON.stringify(items);
+
+// Render inicial
+render();
+
+// Escuchar búsqueda
 search.addEventListener("input", render);
 
 /* ===== EXPORTAR / IMPORTAR ===== */
