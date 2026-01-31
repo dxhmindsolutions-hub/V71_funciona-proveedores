@@ -42,6 +42,19 @@ let cart  = JSON.parse(localStorage.cart  || "[]");
 let deleteIndex = null;
 let deleteType  = null;
 
+/* ===== PROVEEDORES GLOBALES ===== */
+let providers = JSON.parse(localStorage.providers || "[]");
+
+if(providers.length === 0){
+  providers = [
+    "Diemar",
+    "Estrella Damm",
+    "Bgrup",
+    "Pascual",
+    "Mercadona"
+  ];
+}
+
 /* ===== ORDEN INTELIGENTE ===== */
 function parseQty(name){ const m = name.match(/([\d,.]+)/); return m ? parseFloat(m[1].replace(',', '.')) : null; }
 function baseName(name){ return name.replace(/[\d.,]+\s*(cl|l|litros?|kg|g)?/i, '').trim(); }
@@ -110,30 +123,49 @@ ${editMode && (i.suppliers?.length || i.note) ? `
   renderTicket();
   localStorage.items = JSON.stringify(items);
   localStorage.cart  = JSON.stringify(cart);
+  localStorage.providers = JSON.stringify(providers);
+
 }
 
 /* ===== EDITAR ARTÍCULO ===== */
 function editItem(index){
   const item = items[index];
   item.suppliers ??= [];
-item.mainSupplier ??= 0;
-item.note ??= "";
+  item.mainSupplier ??= 0;
+  item.note ??= "";
+
   const m = document.createElement("div");
-  m.className="modal"; m.style.display="flex";
-m.innerHTML = `
+  m.className = "modal";
+  m.style.display = "flex";
+  m.innerHTML = `
   <div class="box">
     <h3>Editar artículo</h3>
 
+    <label>Nombre</label>
     <input id="iname" value="${item.name}">
+
+    <label>Categoría</label>
     <select id="icat">
       ${categories.map(c => `<option ${c===item.cat?'selected':''}>${c}</option>`).join("")}
     </select>
 
-    <p>Proveedores (uno por línea)</p>
-    <textarea id="isuppliers" placeholder="Proveedor : precio
-Ej: CocaCola : 0.50">${item.suppliers
-      .map(s => `${s.name} : ${s.cost}`)
-      .join("\n")}</textarea>
+    <p>Añadir proveedor</p>
+    <select id="providerSelect">
+      <option value="">-- seleccionar --</option>
+      ${providers.map(p => `<option>${p}</option>`).join("")}
+    </select>
+    <input id="providerCost" type="number" step="0.01" placeholder="Precio">
+    <button id="addProvider">➕ Añadir proveedor</button>
+
+    <p>Proveedores del artículo</p>
+    <ul id="providerList">
+      ${item.suppliers.map((s,i)=>`
+        <li>
+          ${s.name} — ${s.cost.toFixed(2)} €
+          <button class="remove-provider" data-index="${i}">✕</button>
+        </li>
+      `).join("")}
+    </ul>
 
     <p>Proveedor principal (nº)</p>
     <input id="imain" type="number" min="1"
@@ -147,34 +179,75 @@ Ej: CocaCola : 0.50">${item.suppliers
       <button id="cancel">Cancelar</button>
     </div>
   </div>
-`;
+  `;
 
   document.body.appendChild(m);
-  m.querySelector("#cancel").onclick = ()=>m.remove();
-m.querySelector("#save").onclick = ()=>{
-item.name = m.querySelector("#iname").value.trim();
-item.cat  = m.querySelector("#icat").value;
 
-// proveedores
-const lines = m.querySelector("#isuppliers").value.split("\n");
-item.suppliers = lines
-  .map(l => l.split(":"))
-  .filter(p => p.length === 2)
-  .map(p => ({
-    name: p[0].trim(),
-    cost: parseFloat(p[1]) || 0
-  }));
+  // ✅ Botón Añadir proveedor
+  m.querySelector("#addProvider").onclick = () => {
+    const name = m.querySelector("#providerSelect").value.trim();
+    const cost = parseFloat(m.querySelector("#providerCost").value);
 
-const main = parseInt(m.querySelector("#imain").value, 10) - 1;
-item.mainSupplier = Math.max(0, Math.min(main, item.suppliers.length - 1));
+    if(!name) return alert("Selecciona un proveedor");
+    if(isNaN(cost)) return alert("Introduce un precio válido");
 
-item.note = m.querySelector("#inote").value.trim();
+    item.suppliers.push({ name, cost });
 
-m.remove();
-render();
+    // Añadir a la lista global si es nuevo
+    if(!providers.includes(name)) providers.push(name);
 
-};
+    // Limpiar inputs
+    m.querySelector("#providerSelect").value = "";
+    m.querySelector("#providerCost").value = "";
+
+    // Actualizar lista de proveedores en el modal sin cerrar
+    const ul = m.querySelector("#providerList");
+    ul.innerHTML = item.suppliers.map((s,i)=>`
+      <li>
+        ${s.name} — ${s.cost.toFixed(2)} €
+        <button class="remove-provider" data-index="${i}">✕</button>
+      </li>
+    `).join("");
+
+    // Reasignar eventos para eliminar
+    ul.querySelectorAll(".remove-provider").forEach(btn=>{
+      btn.onclick = () => {
+        item.suppliers.splice(btn.dataset.index, 1);
+        editItem(index); // reabre el modal actualizado
+      };
+    });
+  };
+
+  // ✅ Botón Cancelar
+  m.querySelector("#cancel").onclick = () => m.remove();
+
+  // ✅ Botón Guardar
+  m.querySelector("#save").onclick = () => {
+    const name = m.querySelector("#iname").value.trim();
+    if(!name) return alert("Nombre del artículo requerido");
+
+    item.name = name;
+    item.cat  = m.querySelector("#icat").value;
+
+    const main = parseInt(m.querySelector("#imain").value, 10) - 1;
+    item.mainSupplier = Math.max(0, Math.min(main, item.suppliers.length - 1));
+
+    item.note = m.querySelector("#inote").value.trim();
+
+    m.remove();
+    render();
+  };
+
+  // Asignar eventos de eliminar proveedores existentes
+  m.querySelectorAll(".remove-provider").forEach(btn=>{
+    btn.onclick = () => {
+      item.suppliers.splice(btn.dataset.index, 1);
+      editItem(index); // reabre el modal actualizado
+    };
+  });
 }
+
+
 /* ===== NUEVO ARTÍCULO ===== */
 function showAddItem(){
   const m = document.createElement("div");
@@ -394,5 +467,9 @@ function importData(event){
   };
   reader.readAsText(file);
 }
+function removeProvider(itemIndex, supplierIndex){
+  items[itemIndex].suppliers.splice(supplierIndex,1);
+  render();
+}
 
-render();
+
