@@ -147,13 +147,27 @@ Ej: CocaCola : 0.50">${item.suppliers
   document.body.appendChild(m);
   m.querySelector("#cancel").onclick = ()=>m.remove();
 m.querySelector("#save").onclick = ()=>{
-  item.name = m.querySelector("#iname").value.trim();
-  item.cat  = m.querySelector("#icat").value;
-  item.cost = parseFloat(m.querySelector("#icost").value) || 0;
-  item.supplier = m.querySelector("#isupplier").value.trim();
-  item.note = m.querySelector("#inote").value.trim();
-  m.remove();
-  render();
+item.name = m.querySelector("#iname").value.trim();
+item.cat  = m.querySelector("#icat").value;
+
+// proveedores
+const lines = m.querySelector("#isuppliers").value.split("\n");
+item.suppliers = lines
+  .map(l => l.split(":"))
+  .filter(p => p.length === 2)
+  .map(p => ({
+    name: p[0].trim(),
+    cost: parseFloat(p[1]) || 0
+  }));
+
+const main = parseInt(m.querySelector("#imain").value, 10) - 1;
+item.mainSupplier = Math.max(0, Math.min(main, item.suppliers.length - 1));
+
+item.note = m.querySelector("#inote").value.trim();
+
+m.remove();
+render();
+
 };
 }
 /* ===== NUEVO ARTÍCULO ===== */
