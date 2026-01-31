@@ -145,7 +145,7 @@ m.querySelector("#save").onclick = ()=>{
   m.remove();
   render();
 };
-
+}
 /* ===== NUEVO ARTÍCULO ===== */
 function showAddItem(){
   const m = document.createElement("div");
