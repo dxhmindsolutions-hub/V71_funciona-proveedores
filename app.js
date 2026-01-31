@@ -110,6 +110,9 @@ function render(){
 /* ===== EDITAR ARTÍCULO ===== */
 function editItem(index){
   const item = items[index];
+  item.suppliers ??= [];
+item.mainSupplier ??= 0;
+item.note ??= "";
   const m = document.createElement("div");
   m.className="modal"; m.style.display="flex";
  m.innerHTML = `
@@ -163,11 +166,11 @@ function showAddItem(){
   document.body.appendChild(m);
   m.querySelector("#cancel").onclick = ()=>m.remove();
   m.querySelector("#save").onclick = ()=>{
- items.push({
+items.push({
   name: m.querySelector("#iname").value.trim(),
   cat:  m.querySelector("#icat").value,
-  cost: 0,
-  supplier: "",
+  suppliers: [],
+  mainSupplier: 0,
   note: ""
 });
     m.remove(); render();
