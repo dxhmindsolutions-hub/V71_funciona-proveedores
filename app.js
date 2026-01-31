@@ -115,7 +115,7 @@ item.mainSupplier ??= 0;
 item.note ??= "";
   const m = document.createElement("div");
   m.className="modal"; m.style.display="flex";
- m.innerHTML = `
+m.innerHTML = `
   <div class="box">
     <h3>Editar artículo</h3>
 
@@ -124,12 +124,18 @@ item.note ??= "";
       ${categories.map(c => `<option ${c===item.cat?'selected':''}>${c}</option>`).join("")}
     </select>
 
-    <p>Gestión interna</p>
-    <input id="icost" type="number" step="0.01" placeholder="Precio de coste"
-      value="${item.cost ?? ''}">
-    <input id="isupplier" placeholder="Proveedor"
-      value="${item.supplier ?? ''}">
-    <textarea id="inote" placeholder="Nota interna">${item.note ?? ''}</textarea>
+    <p>Proveedores (uno por línea)</p>
+    <textarea id="isuppliers" placeholder="Proveedor : precio
+Ej: CocaCola : 0.50">${item.suppliers
+      .map(s => `${s.name} : ${s.cost}`)
+      .join("\n")}</textarea>
+
+    <p>Proveedor principal (nº)</p>
+    <input id="imain" type="number" min="1"
+      value="${item.suppliers.length ? item.mainSupplier + 1 : 1}">
+
+    <p>Nota interna</p>
+    <textarea id="inote">${item.note}</textarea>
 
     <div>
       <button id="save">Guardar</button>
@@ -137,6 +143,7 @@ item.note ??= "";
     </div>
   </div>
 `;
+
   document.body.appendChild(m);
   m.querySelector("#cancel").onclick = ()=>m.remove();
 m.querySelector("#save").onclick = ()=>{
