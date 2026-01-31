@@ -82,7 +82,17 @@ function render(){
       const realIndex = items.indexOf(i);
       return `
         <div class="item">
-          <span>${i.name}${q?`<small style="color:#666">(${i.cat})</small>`:""}</span>
+     <span>
+  ${i.name}
+  ${q ? `<small style="color:#666">(${i.cat})</small>` : ""}
+  ${editMode && (i.cost || i.supplier || i.note) ? `
+    <small style="display:block;color:#666;font-size:12px;margin-top:4px">
+      ${i.cost ? `💰 ${i.cost.toFixed(2)} €` : ""}
+      ${i.supplier ? ` · 🏭 ${i.supplier}` : ""}
+      ${i.note ? ` · 📝 ${i.note}` : ""}
+    </small>
+  ` : ""}
+</span>
           <div>
             ${editMode
               ? `<button class="del" onclick="askDeleteItem('${i.name.replace(/'/g,"\\'")}')">✕</button>
