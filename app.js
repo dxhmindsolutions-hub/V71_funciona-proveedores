@@ -85,13 +85,18 @@ function render(){
      <span>
   ${i.name}
   ${q ? `<small style="color:#666">(${i.cat})</small>` : ""}
-  ${editMode && (i.cost || i.supplier || i.note) ? `
-    <small style="display:block;color:#666;font-size:12px;margin-top:4px">
-      ${i.cost ? `💰 ${i.cost.toFixed(2)} €` : ""}
-      ${i.supplier ? ` · 🏭 ${i.supplier}` : ""}
-      ${i.note ? ` · 📝 ${i.note}` : ""}
-    </small>
-  ` : ""}
+${editMode && (i.suppliers?.length || i.note) ? `
+  <small style="display:block;color:#666;font-size:12px;margin-top:4px">
+    ${i.suppliers?.[i.mainSupplier]
+      ? `💰 ${i.suppliers[i.mainSupplier].cost.toFixed(2)} €`
+      : ""}
+    ${i.suppliers?.length > 1
+      ? ` · 🏭 ${i.suppliers.length} proveedores`
+      : ""}
+    ${i.note ? ` · 📝 ${i.note}` : ""}
+  </small>
+` : ""}
+
 </span>
           <div>
             ${editMode
