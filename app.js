@@ -102,26 +102,40 @@ function editItem(index){
   const item = items[index];
   const m = document.createElement("div");
   m.className="modal"; m.style.display="flex";
-  m.innerHTML = `
-    <div class="box">
-      <h3>Editar artículo</h3>
-      <input id="iname" value="${item.name}">
-      <select id="icat">
-        ${categories.map(c => `<option ${c===item.cat?'selected':''}>${c}</option>`).join("")}
-      </select>
-      <div>
-        <button id="save">Guardar</button>
-        <button id="cancel">Cancelar</button>
-      </div>
-    </div>`;
+ m.innerHTML = `
+  <div class="box">
+    <h3>Editar artículo</h3>
+
+    <input id="iname" value="${item.name}">
+    <select id="icat">
+      ${categories.map(c => `<option ${c===item.cat?'selected':''}>${c}</option>`).join("")}
+    </select>
+
+    <p>Gestión interna</p>
+    <input id="icost" type="number" step="0.01" placeholder="Precio de coste"
+      value="${item.cost ?? ''}">
+    <input id="isupplier" placeholder="Proveedor"
+      value="${item.supplier ?? ''}">
+    <textarea id="inote" placeholder="Nota interna">${item.note ?? ''}</textarea>
+
+    <div>
+      <button id="save">Guardar</button>
+      <button id="cancel">Cancelar</button>
+    </div>
+  </div>
+`;
   document.body.appendChild(m);
   m.querySelector("#cancel").onclick = ()=>m.remove();
-  m.querySelector("#save").onclick = ()=>{
-    item.name = m.querySelector("#iname").value.trim();
-    item.cat  = m.querySelector("#icat").value;
-    m.remove(); render();
-  };
-}
+m.querySelector("#save").onclick = ()=>{
+  item.name = m.querySelector("#iname").value.trim();
+  item.cat  = m.querySelector("#icat").value;
+  item.cost = parseFloat(m.querySelector("#icost").value) || 0;
+  item.supplier = m.querySelector("#isupplier").value.trim();
+  item.note = m.querySelector("#inote").value.trim();
+  m.remove();
+  render();
+};
+
 /* ===== NUEVO ARTÍCULO ===== */
 function showAddItem(){
   const m = document.createElement("div");
@@ -139,10 +153,13 @@ function showAddItem(){
   document.body.appendChild(m);
   m.querySelector("#cancel").onclick = ()=>m.remove();
   m.querySelector("#save").onclick = ()=>{
-    items.push({
-      name: m.querySelector("#iname").value.trim(),
-      cat:  m.querySelector("#icat").value
-    });
+ items.push({
+  name: m.querySelector("#iname").value.trim(),
+  cat:  m.querySelector("#icat").value,
+  cost: 0,
+  supplier: "",
+  note: ""
+});
     m.remove(); render();
   };
 }
