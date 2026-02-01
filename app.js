@@ -90,7 +90,20 @@ function render(){
   renderDrawer();
   const q = search.value.toLowerCase();
   list.innerHTML = items
-    .filter(i => q ? i.name.toLowerCase().includes(q) : i.cat === activeCat)
+.filter(i => {
+
+  if(!q) return i.cat === activeCat;
+
+  const nameMatch = i.name.toLowerCase().includes(q);
+
+  const provMatch =
+    i.suppliers?.[i.mainSupplier]?.name
+      ?.toLowerCase()
+      .includes(q);
+
+  return nameMatch || provMatch;
+
+})
     .map(i => {
       const realIndex = items.indexOf(i);
       return `
