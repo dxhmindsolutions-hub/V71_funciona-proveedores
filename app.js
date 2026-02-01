@@ -92,16 +92,17 @@ function render(){
   list.innerHTML = items
 .filter(i => {
 
-  if(!q) return i.cat === activeCat;
+  const inCat = i.cat === activeCat;
+
+  if(!q) return inCat;
 
   const nameMatch = i.name.toLowerCase().includes(q);
-
   const provMatch =
     i.suppliers?.[i.mainSupplier]?.name
       ?.toLowerCase()
       .includes(q);
 
-  return nameMatch || provMatch;
+  return inCat && (nameMatch || provMatch);
 
 })
     .map(i => {
