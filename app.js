@@ -44,6 +44,7 @@ let deleteType  = null;
 
 /* ===== PROVEEDORES GLOBALES ===== */
 let providers = JSON.parse(localStorage.providers || "[]");
+let providerFilter = null; // proveedor seleccionado o null
 
 if(providers.length === 0){
   providers = [
