@@ -446,7 +446,6 @@ function printTicket(){
 
 /* ===== FILTRO POR PROVEEDOR ===== */
 function openProviderFilter(){
-
   const m = document.createElement("div");
   m.className = "modal";
   m.style.display = "flex";
@@ -455,48 +454,37 @@ function openProviderFilter(){
     <div class="box">
       <h3>Filtrar por proveedor</h3>
 
-      <div class="btns unit" id="provBtns">
-        <button data-prov="" class="${!providerFilter ? 'active':''}">
+      <div class="chips" id="provBtns">
+        <button class="chip ${!providerFilter ? 'active':''}" data-prov="">
           Todos
         </button>
 
         ${providers.map(p => `
-          <button data-prov="${p}" 
-            class="${providerFilter===p ? 'active':''}">
+          <button class="chip ${providerFilter===p ? 'active':''}" data-prov="${p}">
             ${p}
           </button>
         `).join("")}
       </div>
 
-      <div style="margin-top:12px">
-        <button id="close">Cerrar</button>
+      <div style="margin-top:16px">
+        <button id="cancel">Cerrar</button>
       </div>
     </div>
   `;
 
   document.body.appendChild(m);
 
-  const btns = m.querySelectorAll("#provBtns button");
-
-  btns.forEach(btn=>{
-    btn.onclick = () => {
-
-      // marcar activo visual
-      btns.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      providerFilter = btn.dataset.prov || null;
-
-      setTimeout(()=>{
-        m.remove();
-        render();
-      },150);
+  // clicks chips
+  m.querySelectorAll(".chip").forEach(b=>{
+    b.onclick = () => {
+      providerFilter = b.dataset.prov || null;
+      m.remove();
+      render();
     };
   });
 
-  m.querySelector("#close").onclick = () => m.remove();
+  m.querySelector("#cancel").onclick = () => m.remove();
 }
-
 
 /* ===== INICIAL ===== */
 if(items.length===0){
