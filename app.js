@@ -434,6 +434,42 @@ function printTicket(){
   container.style.display="block"; window.print(); container.style.display="none";
 }
 
+/* ===== FILTRO POR PROVEEDOR ===== */
+function openProviderFilter(){
+  const m = document.createElement("div");
+  m.className = "modal";
+  m.style.display = "flex";
+
+  m.innerHTML = `
+    <div class="box">
+      <h3>Filtrar por proveedor</h3>
+
+      <button data-prov="">Todos</button>
+
+      ${providers.map(p => `
+        <button data-prov="${p}">${p}</button>
+      `).join("")}
+
+      <div style="margin-top:12px">
+        <button id="close">Cerrar</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(m);
+
+  m.querySelectorAll("[data-prov]").forEach(btn=>{
+    btn.onclick = () => {
+      providerFilter = btn.dataset.prov || null;
+      m.remove();
+      render();
+    };
+  });
+
+  m.querySelector("#close").onclick = () => m.remove();
+}
+
+
 /* ===== INICIAL ===== */
 if(items.length===0){
   items = [
