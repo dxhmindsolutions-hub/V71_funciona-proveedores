@@ -95,7 +95,16 @@ function render(){
 
   const inCat = i.cat === activeCat;
 
-  if(!q) return inCat;
+  if(!inCat) return false;
+
+  // ✅ filtro proveedor
+  if(providerFilter){
+    const prov = i.suppliers?.[i.mainSupplier]?.name;
+    if(prov !== providerFilter) return false;
+  }
+
+  // ✅ filtro texto
+  if(!q) return true;
 
   const nameMatch = i.name.toLowerCase().includes(q);
   const provMatch =
@@ -103,9 +112,10 @@ function render(){
       ?.toLowerCase()
       .includes(q);
 
-  return inCat && (nameMatch || provMatch);
+  return nameMatch || provMatch;
 
 })
+
     .map(i => {
       const realIndex = items.indexOf(i);
       return `
