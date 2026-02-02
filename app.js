@@ -446,6 +446,7 @@ function printTicket(){
 
 /* ===== FILTRO POR PROVEEDOR ===== */
 function openProviderFilter(){
+
   const m = document.createElement("div");
   m.className = "modal";
   m.style.display = "flex";
@@ -454,11 +455,18 @@ function openProviderFilter(){
     <div class="box">
       <h3>Filtrar por proveedor</h3>
 
-      <button data-prov="">Todos</button>
+      <div class="btns unit" id="provBtns">
+        <button data-prov="" class="${!providerFilter ? 'active':''}">
+          Todos
+        </button>
 
-      ${providers.map(p => `
-        <button data-prov="${p}">${p}</button>
-      `).join("")}
+        ${providers.map(p => `
+          <button data-prov="${p}" 
+            class="${providerFilter===p ? 'active':''}">
+            ${p}
+          </button>
+        `).join("")}
+      </div>
 
       <div style="margin-top:12px">
         <button id="close">Cerrar</button>
@@ -468,11 +476,21 @@ function openProviderFilter(){
 
   document.body.appendChild(m);
 
-  m.querySelectorAll("[data-prov]").forEach(btn=>{
+  const btns = m.querySelectorAll("#provBtns button");
+
+  btns.forEach(btn=>{
     btn.onclick = () => {
+
+      // marcar activo visual
+      btns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
       providerFilter = btn.dataset.prov || null;
-      m.remove();
-      render();
+
+      setTimeout(()=>{
+        m.remove();
+        render();
+      },150);
     };
   });
 
