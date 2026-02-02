@@ -498,10 +498,6 @@ function openProviderFilter(){
   };
 }
 
-
-  m.querySelector("#cancel").onclick = () => m.remove();
-}
-
 /* ===== INICIAL ===== */
 if(items.length===0){
   items = [
