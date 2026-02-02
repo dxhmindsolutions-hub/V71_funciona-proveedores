@@ -44,7 +44,7 @@ let deleteType  = null;
 
 /* ===== PROVEEDORES GLOBALES ===== */
 let providers = JSON.parse(localStorage.providers || "[]");
-let providerFilter = null; // proveedor seleccionado o null
+let providerFilter = new Set(); // múltiples proveedores
 
 if(providers.length === 0){
   providers = [
@@ -97,11 +97,11 @@ function render(){
 
   if(!inCat) return false;
 
-  // ✅ filtro proveedor
-  if(providerFilter){
-    const prov = i.suppliers?.[i.mainSupplier]?.name;
-    if(prov !== providerFilter) return false;
-  }
+// ✅ filtro multi proveedor
+if(providerFilter.size > 0){
+  const prov = i.suppliers?.[i.mainSupplier]?.name;
+  if(!providerFilter.has(prov)) return false;
+}
 
   // ✅ filtro texto
   if(!q) return true;
@@ -454,34 +454,50 @@ function openProviderFilter(){
     <div class="box">
       <h3>Filtrar por proveedor</h3>
 
-      <div class="chips" id="provBtns">
-        <button class="chip ${!providerFilter ? 'active':''}" data-prov="">
-          Todos
-        </button>
-
+      <div class="chips">
         ${providers.map(p => `
-          <button class="chip ${providerFilter===p ? 'active':''}" data-prov="${p}">
+          <button class="chip ${providerFilter.has(p) ? 'active':''}" data-prov="${p}">
             ${p}
           </button>
         `).join("")}
       </div>
 
-      <div style="margin-top:16px">
-        <button id="cancel">Cerrar</button>
+      <div style="margin-top:16px; display:flex; gap:8px">
+        <button id="clear">Limpiar</button>
+        <button id="close">Aplicar</button>
       </div>
     </div>
   `;
 
   document.body.appendChild(m);
 
-  // clicks chips
-  m.querySelectorAll(".chip").forEach(b=>{
-    b.onclick = () => {
-      providerFilter = b.dataset.prov || null;
-      m.remove();
-      render();
+  // toggle selección
+  m.querySelectorAll(".chip").forEach(btn=>{
+    btn.onclick = () => {
+      const p = btn.dataset.prov;
+
+      if(providerFilter.has(p)){
+        providerFilter.delete(p);
+        btn.classList.remove("active");
+      } else {
+        providerFilter.add(p);
+        btn.classList.add("active");
+      }
     };
   });
+
+  m.querySelector("#clear").onclick = () => {
+    providerFilter.clear();
+    m.remove();
+    render();
+  };
+
+  m.querySelector("#close").onclick = () => {
+    m.remove();
+    render();
+  };
+}
+
 
   m.querySelector("#cancel").onclick = () => m.remove();
 }
